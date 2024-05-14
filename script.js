@@ -20,18 +20,16 @@
             let currentHumidity = null;
 
             data.data.forEach(item => {
-                if (!labels.includes(item.time)) {
-                    labels.push(item.time);
-                }
+                labels.push(item.id); // Sử dụng id làm nhãn
 
                 if (item.sid == 1) {
-                    tempValues.push(item.value);
-                    currentTemp = item.value; // Cập nhật nhiệt độ hiện tại
+                    tempValues.push(item.tempp);
+                    currentTemp = item.tempp; // Cập nhật nhiệt độ hiện tại
                     humidityValues.push(null);
                 } else if (item.sid == 2) {
                     tempValues.push(null);
-                    humidityValues.push(item.value);
-                    currentHumidity = item.value; // Cập nhật độ ẩm hiện tại
+                    humidityValues.push(item.tempp);
+                    currentHumidity = item.tempp; // Cập nhật độ ẩm hiện tại
                 }
             });
 
