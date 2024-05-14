@@ -1,0 +1,207 @@
+[
+    {
+        "id": "489cfd71bb675ea0",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "dada0e6f484a7f48",
+        "type": "inject",
+        "z": "489cfd71bb675ea0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 160,
+        "wires": [
+            [
+                "7ad1522f6d1aa7fb"
+            ]
+        ]
+    },
+    {
+        "id": "7ad1522f6d1aa7fb",
+        "type": "http request",
+        "z": "489cfd71bb675ea0",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://127.0.0.1:8000/",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 450,
+        "y": 160,
+        "wires": [
+            [
+                "9e42afa1c9b0ff1c"
+            ]
+        ]
+    },
+    {
+        "id": "1d86b173e957d9c4",
+        "type": "MSSQL",
+        "z": "489cfd71bb675ea0",
+        "mssqlCN": "da15c05c03445404",
+        "name": "",
+        "query": "",
+        "outField": "payload",
+        "x": 720,
+        "y": 180,
+        "wires": [
+            [
+                "9b611742eb7120bd"
+            ]
+        ]
+    },
+    {
+        "id": "9e42afa1c9b0ff1c",
+        "type": "function",
+        "z": "489cfd71bb675ea0",
+        "name": "function 6",
+        "func": "var json = JSON.parse(msg.payload);\nmsg.payload = `INSERT INTO temp (sid, tempp) VALUES ('1', ${json.temperature})`;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 260,
+        "wires": [
+            [
+                "1d86b173e957d9c4",
+                "fee64daa38bd5aa1"
+            ]
+        ]
+    },
+    {
+        "id": "9b611742eb7120bd",
+        "type": "debug",
+        "z": "489cfd71bb675ea0",
+        "name": "debug 11",
+        "active": true,
+        "tosidebar": false,
+        "console": true,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "33ed8d7fc3a73d90",
+        "type": "inject",
+        "z": "489cfd71bb675ea0",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 220,
+        "y": 80,
+        "wires": [
+            [
+                "64836ac6a1a7bc07"
+            ]
+        ]
+    },
+    {
+        "id": "64836ac6a1a7bc07",
+        "type": "function",
+        "z": "489cfd71bb675ea0",
+        "name": "",
+        "func": "msg.payload = 'select * from temp;'\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 60,
+        "wires": [
+            [
+                "1d86b173e957d9c4",
+                "761b4a596ccecbe5"
+            ]
+        ]
+    },
+    {
+        "id": "fee64daa38bd5aa1",
+        "type": "debug",
+        "z": "489cfd71bb675ea0",
+        "name": "debug 12",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "761b4a596ccecbe5",
+        "type": "debug",
+        "z": "489cfd71bb675ea0",
+        "name": "debug 13",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 740,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "da15c05c03445404",
+        "type": "MSSQL-CN",
+        "name": "sql",
+        "server": "DESKTOP-7T0Q7H0",
+        "encyption": true,
+        "database": "data_python"
+    }
+]
