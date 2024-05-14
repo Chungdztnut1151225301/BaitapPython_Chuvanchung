@@ -1,74 +1,90 @@
-  <html>
-  <head>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-      google.charts.load('current', {'packages':['corechart']});
-      //google.charts.setOnLoadCallback(drawChart);
-		function parseTimeString(timeString) {
-			// Tách năm, tháng, ngày, giờ, phút và giây từ chuỗi thời gian
-			const [datePart, timePart] = timeString.split('T');
-			const [year, month, day] = datePart.split('-');
-			const [hour, minute, second] = timePart.split(':');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Temperature and Humidity Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Current Temperature: <span id="currentTemp">N/A</span></h1>
+    <h1>Current Humidity: <span id="currentHumidity">N/A</span></h1>
+    <canvas id="myChart" width="400" height="200"></canvas>
 
-			// Tạo một đối tượng Date từ các phần đã tách
-			const dateObject = new Date(year, month - 1, day, hour, minute, second);
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('api.aspx')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data); // Ghi nhật ký dữ liệu trả về để kiểm tra
 
-			return dateObject;
-		}
-      function drawChart(json) {
-        //var json = {"name":"nhiệt độ phòng khách","data":[{"v":28.00,"t":"2024-05-13T03:30:00"},{"v":28.00,"t":"2024-05-13T04:58:21"},{"v":28.10,"t":"2024-05-13T04:58:24"},{"v":28.10,"t":"2024-05-13T04:59:36"},{"v":28.20,"t":"2024-05-13T04:59:39"},{"v":28.20,"t":"2024-05-13T05:08:18"},{"v":28.30,"t":"2024-05-13T05:08:21"},{"v":28.30,"t":"2024-05-13T05:20:21"},{"v":28.50,"t":"2024-05-13T05:20:24"},{"v":28.50,"t":"2024-05-13T05:21:27"},{"v":28.60,"t":"2024-05-13T05:21:30"},{"v":28.60,"t":"2024-05-13T05:21:54"},{"v":28.70,"t":"2024-05-13T05:21:57"},{"v":28.70,"t":"2024-05-13T05:22:48"},{"v":28.60,"t":"2024-05-13T05:22:51"},{"v":28.60,"t":"2024-05-13T05:23:57"},{"v":28.50,"t":"2024-05-13T05:24:00"},{"v":28.50,"t":"2024-05-13T05:28:39"},{"v":28.60,"t":"2024-05-13T05:28:42"},{"v":28.60,"t":"2024-05-13T05:29:06"},{"v":28.80,"t":"2024-05-13T05:29:09"},{"v":28.80,"t":"2024-05-13T05:30:00"},{"v":0.00,"t":"2024-05-13T05:30:00"},{"v":0.00,"t":"2024-05-13T05:45:51"},{"v":32.00,"t":"2024-05-13T05:45:51"},{"v":32.00,"t":"2024-05-13T05:46:18"},{"v":32.10,"t":"2024-05-13T05:46:21"},{"v":32.10,"t":"2024-05-13T05:47:06"},{"v":32.30,"t":"2024-05-13T05:47:09"},{"v":32.30,"t":"2024-05-13T05:48:00"},{"v":33.00,"t":"2024-05-13T05:48:03"}]}
-        var dulieu =[['time', json.name]];
-        for(var item of json.data){
-        	dulieu.push([parseTimeString(item.t), item.v]);
-        }
-        var data = google.visualization.arrayToDataTable(dulieu);
+                    if (data.ok !== 1) {
+                        throw new Error('API returned an error: ' + data.msg);
+                    }
 
-        var options = {
-          title: 'Company Performance',
-          //curveType: 'function',
-          legend: { position: 'bottom' }
-        };
+                    let labels = [];
+                    let tempValues = [];
+                    let humidityValues = [];
+                    let currentTemp = null;
+                    let currentHumidity = null;
 
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+                    data.data.forEach(item => {
+                        labels.push(item.id); // Sử dụng id làm nhãn
 
-        chart.draw(data, options);
-      }
-      function ve_bieu_do(){
-        //get json from db
-        // Tạo một XMLHttpRequest object
-		var xhr = new XMLHttpRequest();
+                        if (item.sid == 1) {
+                            tempValues.push(item.tempp);
+                            currentTemp = item.tempp; // Cập nhật nhiệt độ hiện tại
+                            humidityValues.push(null);
+                        } else if (item.sid == 2) {
+                            tempValues.push(null);
+                            humidityValues.push(item.tempp);
+                            currentHumidity = item.tempp; // Cập nhật độ ẩm hiện tại
+                        }
+                    });
 
-		// Khai báo hàm callback để xử lý kết quả trả về từ API
-		xhr.onreadystatechange = function() {
-		    if (xhr.readyState === XMLHttpRequest.DONE) {
-		        if (xhr.status === 200) {
-		            // Xử lý kết quả trả về từ API ở đây
-		            var json = JSON.parse(xhr.responseText);
-		            //call hàm mẫu
-        			drawChart(json);
-		        } else {
-		            // Xử lý lỗi nếu có
-		            console.error('Đã có lỗi khi gọi tới API:', xhr.status);
-		        }
-		    }
-		};
+                    // Hiển thị nhiệt độ và độ ẩm hiện tại
+                    document.getElementById('currentTemp').innerText = currentTemp ? currentTemp + '°C' : 'N/A';
+                    document.getElementById('currentHumidity').innerText = currentHumidity ? currentHumidity + '%' : 'N/A';
 
-		// Cấu hình request: method, endpoint và có thể thêm thông tin khác như headers,...
-		var method = "GET"; // hoặc "POST", "PUT",...
-		var url = "/api.aspx?sid=1"; // URL của API bạn muốn gọi
-
-		// Mở kết nối đến API
-		xhr.open(method, url, true);
-
-		// Gửi request
-		xhr.send();
-
-        
-      }
+                    var ctx = document.getElementById('myChart').getContext('2d');
+                    var myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Temperature',
+                                    data: tempValues,
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    borderWidth: 1,
+                                    spanGaps: true
+                                },
+                                {
+                                    label: 'Humidity',
+                                    data: humidityValues,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1,
+                                    spanGaps: true
+                                }
+                            ]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        });
     </script>
-  </head>
-  <body>
-  	<button onclick="ve_bieu_do()">Tải json về vẽ biểu đồ</button>
-    <div id="curve_chart" style="width: 900px; height: 500px"></div>
-  </body>
+</body>
 </html>
